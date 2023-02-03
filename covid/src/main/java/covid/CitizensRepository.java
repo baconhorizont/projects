@@ -5,14 +5,16 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.List;
 
 public class CitizensRepository {
     private JdbcTemplate jdbcTemplate;
+    private DataSource dataSource;
 
     public CitizensRepository(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.dataSource = dataSource;
     }
 
     public Long insertCitizen(String name, String zipCode, int age, String email, String sscNumber){
@@ -46,5 +48,27 @@ public class CitizensRepository {
         );
         return keyHolder.getKey().longValue();
     }
+//    public void insertCitizen(Citizen citizen,WrongDataInputException... wdie){
+//        try (Connection conn = dataSource.getConnection()) {
+//            conn.setAutoCommit(false);
+//            try (PreparedStatement ps = conn.prepareStatement("insert into citizens (citizen_name, zip, age, email, taj) values(?,?,?,?,?)")){
+//                if (wdie.length != 0){
+//                    throw new IllegalArgumentException();
+//                }
+//                    ps.setString(1, citizen.getName());
+//                    ps.setString(2,citizen.getZipCode());
+//                    ps.setInt(3,citizen.getAge());
+//                    ps.setString(4,citizen.getEmail());
+//                    ps.setString(5,citizen.getSocialSecurityNumber());
+//                    ps.executeUpdate();
+//                conn.commit();
+//            } catch (IllegalArgumentException iae){
+//                conn.rollback();
+//            }
+//        } catch (SQLException sqle){
+//            throw new IllegalStateException("Save failed!",sqle);
+//        }
+//    }
 
 }
+

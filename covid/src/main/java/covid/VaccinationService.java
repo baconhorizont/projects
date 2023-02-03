@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VaccinationService {
 
@@ -86,23 +88,32 @@ public class VaccinationService {
     public void insertCitizen(String name, String zipCode, int age, String email, String sscNumber) {
         citizensRepository.insertCitizen(name,zipCode,age,email,sscNumber);
     }
-    public void insertCitizen(Citizen citizen) {
-        citizensRepository.insertCitizen(citizen);
-    }
 
     public void insertCitizensFromFile(String path){
+        List<String> wrongLines = new ArrayList<>();
+        String line;
         try(BufferedReader br = Files.newBufferedReader(Path.of(path))){
             br.readLine();
-            String line;
             while((line=br.readLine())!=null){
-                processLine(line);
+                try {
+                    processLine(line);
+                } catch (WrongDataInputException wdie){
+                    wrongLines.add(wdie.getMessage() + " " + line);
+                }
             }
-        } catch (IOException e) {
+        }catch (IOException e) {
             throw new IllegalStateException("Can not reach file!");
+        }
+
+        if(!wrongLines.isEmpty()){
+            writeWrongLines(wrongLines);
+            System.out.println("A megadott fájl hibás adatokat tartalmaz.");
+            System.out.println("A hibás adatok a következő fájlba lettek mentve: src/test/resources/citizensDataToCorrect.csv");
+            System.out.println("A hibás adatokal rendelkező személyek nem lettek regisztrálva! Regisztrálás előtt javítsa az adatokat!");
         }
     }
 
-    private void processLine(String line) {
+    private void processLine(String line) throws WrongDataInputException {
         String[] temp = line.split(DELIMITER);
         validateName(temp[0]);
         validateZipCode(temp[1]);
@@ -112,4 +123,13 @@ public class VaccinationService {
         Citizen citizen = new Citizen(temp[0],temp[1],Integer.parseInt(temp[2]),temp[3],temp[4]);
         citizensRepository.insertCitizen(citizen);
     }
+
+    private void writeWrongLines(List<String> wrongLines){
+        try {
+            Files.write(Path.of("src/test/resources/citizensDataToCorrect.csv"),wrongLines);
+        }catch (IOException ioe){
+            throw new IllegalStateException("Cant write file",ioe);
+        }
+    }
+
 }

@@ -6,12 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.mariadb.jdbc.MariaDbDataSource;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CitiesRepositoryTest {
-
-    CitiesRepository citiesRepository;
+class VaccinationsRepositoryTest {
+    VaccinationsRepository vaccinationsRepository;
+    CitizensRepository citizensRepository;
 
     Flyway flyway;
 
@@ -31,19 +32,19 @@ class CitiesRepositoryTest {
         flyway.clean();
         flyway.migrate();
 
-        citiesRepository = new CitiesRepository(dataSource);
+        vaccinationsRepository = new VaccinationsRepository(dataSource);
+        citizensRepository = new CitizensRepository(dataSource);
+        citizensRepository.insertCitizen("Bence","7030",66,"alma@alma.com","544252424");
+        citizensRepository.insertCitizen("Kata","7030",25,"alma@alma.com","544252424");
+        citizensRepository.insertCitizen("Tamás","7030",44,"alma@alma.com","544252424");
 
     }
 
     @Test
-    void testGetCityByZip(){
+    void testInsertVaccination(){
 
-        City city = citiesRepository.getCityByZipCode("2073");
-        assertEquals("Tök",city.getCityName());
-        assertEquals(null,city.getCityPartName());
-
-        City cityWithPartName = citiesRepository.getCityByZipCode("2484");
-        assertEquals("Agárd",cityWithPartName.getCityPartName());
+        Long id = vaccinationsRepository.insertVaccination(1L, LocalDateTime.now(),VaccinationStatus.OK,"asd",VaccinationType.PFIZER);
+        assertEquals(1L,id);
     }
 
 }

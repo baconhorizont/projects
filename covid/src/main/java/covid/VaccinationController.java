@@ -1,5 +1,6 @@
 package covid;
 
+import java.nio.file.Path;
 import java.util.Scanner;
 
 public class VaccinationController {
@@ -31,7 +32,7 @@ public class VaccinationController {
     private void controlMenu(int menuNumber) {
         switch (menuNumber) {
             case 1 -> scanForRegistration();
-            case 2 -> System.out.println("Tömeges regisztráció");
+            case 2 -> insertCitizensFromFile();
             case 3 -> System.out.println("Generálás");
             case 4 -> System.out.println("Oltás");
             case 5 -> System.out.println("Oltás meghiúsulás");
@@ -53,11 +54,16 @@ public class VaccinationController {
         }catch (WrongDataInputException wdie){
             System.out.println(wdie.getMessage());
             System.out.println("Regisztráció megszakadt, kezdje előről.");
-           // recallRegistration(wdie);
         }
             System.out.println("Regisztráció befejezve.");
     }
 
+    private void insertCitizensFromFile(){
+        System.out.println("File elérési útja:");
+        String path = scanner.nextLine();
+        vaccinationService.insertCitizensFromFile(path);
+        System.out.println("A feltöltés siekres.");
+    }
     private String scanSscNumber() {
         System.out.println("Tajszám:");
         String sscNumber = scanner.nextLine();
@@ -65,16 +71,6 @@ public class VaccinationController {
         return sscNumber;
     }
 
-    //    private void recallRegistration(WrongDataInputException wdie) {
-//        switch (wdie.getMessage()) {
-//            case "A név megadása kötelező." -> scanName();
-//            case "Helytelen vagy üresen hagyott irányítószám." -> scanZipCode();
-//            case "Helytelen életkor." -> scanAge();
-//            case "Helytelen email." -> scanEmail();
-//            default -> scanForRegistration();
-//        }
-//        scanForRegistration();
-//    }
     private int scanAge() {
         System.out.println("Életkor:");
         int age = Integer.parseInt(scanner.nextLine());
