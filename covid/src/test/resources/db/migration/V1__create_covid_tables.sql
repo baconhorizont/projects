@@ -5,8 +5,8 @@ CREATE TABLE citizens(
 	age bigint NOT NULL,
 	email varchar(200),
 	taj varchar(10),
-	number_of_vaccinations bigint,
-	last_vaccination datetime,
+	number_of_vaccinations bigint default 0,
+	last_vaccination datetime NOT NULL default '1900-00-00 00:00:00',
 	PRIMARY KEY (citizen_id)
 );
 

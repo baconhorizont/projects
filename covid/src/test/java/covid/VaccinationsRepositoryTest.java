@@ -37,14 +37,23 @@ class VaccinationsRepositoryTest {
         citizensRepository.insertCitizen("Bence","7030",66,"alma@alma.com","544252424");
         citizensRepository.insertCitizen("Kata","7030",25,"alma@alma.com","544252424");
         citizensRepository.insertCitizen("Tamás","7030",44,"alma@alma.com","544252424");
+        citizensRepository.insertCitizen("Tamás","7030",44,"alma@alma.com","544252424");
+        citizensRepository.insertCitizen("Tamás","7030",44,"alma@alma.com","544252424");
 
     }
 
     @Test
     void testInsertVaccination(){
 
-        Long id = vaccinationsRepository.insertVaccination(1L, LocalDateTime.now(),VaccinationStatus.OK,"asd",VaccinationType.PFIZER);
+        Long id = vaccinationsRepository.insertVaccination(1L, LocalDateTime.now(),VaccinationStatus.OK,"",VaccinationType.PFIZER);
         assertEquals(1L,id);
+    }
+
+    @Test
+    void getVaccinationByCitizenId(){
+        Long id = vaccinationsRepository.insertVaccination(5L, LocalDateTime.now(),VaccinationStatus.OK,"",VaccinationType.PFIZER);
+        Vaccination vaccination = vaccinationsRepository.getVaccinationByCitizenId(5L);
+        assertEquals(VaccinationType.PFIZER,vaccination.getType());
     }
 
 }

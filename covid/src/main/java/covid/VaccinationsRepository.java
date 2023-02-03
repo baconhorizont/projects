@@ -34,15 +34,15 @@ public class VaccinationsRepository {
         return keyHolder.getKey().longValue();
     }
 
-    public Long insertVaccination(Vaccination vaccination){
+
+    public Long insertRejectedVaccination(Long citizenId, LocalDateTime vaccinationTime, VaccinationStatus status, String note){
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
-                    PreparedStatement ps = con.prepareStatement("insert into vaccinations (citizen_id, vaccination_date, `status`, note, vaccination_type) values(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-                    ps.setLong(1,vaccination.getCitizenId());
-                    ps.setTimestamp(2, Timestamp.valueOf(vaccination.getVaccinationTime()));
-                    ps.setString(3,vaccination.getStatus().toString());
-                    ps.setString(4,vaccination.getNote());
-                    ps.setString(5,vaccination.getType().toString());
+                    PreparedStatement ps = con.prepareStatement("insert into vaccinations (citizen_id, vaccination_date, `status`, note) values(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                    ps.setLong(1,citizenId);
+                    ps.setTimestamp(2, Timestamp.valueOf(vaccinationTime));
+                    ps.setString(3,status.toString());
+                    ps.setString(4,note);
                     return ps;
                 },
                 keyHolder
@@ -50,6 +50,14 @@ public class VaccinationsRepository {
         return keyHolder.getKey().longValue();
     }
 
-
+    public Vaccination getVaccinationByCitizenId(Long citizenId){
+        String sqlQuery = "SELECT * FROM vaccinations WHERE citizen_id = ? AND `status` = 'OK'";
+        return jdbcTemplate.queryForObject(sqlQuery,(rs,rowNum) -> new Vaccination(rs.getLong("vaccination_id"),
+                        rs.getLong("citizen_id"),
+                        rs.getTimestamp("vaccination_date").toLocalDateTime(),
+                        VaccinationStatus.valueOf(rs.getString("status")),
+                        VaccinationType.valueOf(rs.getString("vaccination_type"))),
+                citizenId);
+    }
 
 }

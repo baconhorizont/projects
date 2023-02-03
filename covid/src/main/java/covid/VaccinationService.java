@@ -2,18 +2,23 @@ package covid;
 
 import org.flywaydb.core.Flyway;
 import org.mariadb.jdbc.MariaDbDataSource;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VaccinationService {
 
     private static final String DELIMITER = ";";
+    private static final String GENERATED_DOCUMENT_HEAD = "Időpont;Név;Irányítószám;Életkor;E-mail cím;TAJ szám";
     private MariaDbDataSource dataSource = new MariaDbDataSource();
     private CitizensRepository citizensRepository;
     private VaccinationsRepository vaccinationsRepository;
@@ -130,6 +135,56 @@ public class VaccinationService {
         }catch (IOException ioe){
             throw new IllegalStateException("Cant write file",ioe);
         }
+    }
+
+    public void generateFile(String zipCode, String fileName) {
+      List<Citizen> result = citizensRepository.getCitizensByZipCodeToVaccination(zipCode);
+      List<String> toWrite = new ArrayList<>();
+      toWrite.add(GENERATED_DOCUMENT_HEAD);
+      LocalTime startTime = LocalTime.of(8, 0);
+
+        for (Citizen actual: result) {
+            toWrite.add(String.format("%s;%s;%s;%d;%s;%s",startTime,actual.getName(),actual.getZipCode(),actual.getAge(),actual.getEmail(),actual.getSocialSecurityNumber()));
+            startTime = startTime.plusMinutes(30);
+        }
+        try {
+            Files.write(Path.of(String.format("src/test/resources/%s.csv",fileName)),toWrite);
+        }catch (IOException ioe){
+            throw new IllegalStateException("Cant write file",ioe);
+        }
+    }
+
+    public void vaccination(String sscNumber, LocalDateTime vaccinationTime, VaccinationType vaccinationType) {
+        Citizen citizen = citizensRepository.getCitizenBySscNUmber(sscNumber);
+        if(citizen.getLastVaccination().isAfter(vaccinationTime.minusDays(15))){
+            throw new WrongDataInputException("Nem telt el a 15 nap a két oltás között!");
+        }
+        citizensRepository.updateCitizenVaccinationById(citizen.getId(),vaccinationTime);
+        vaccinationsRepository.insertVaccination(citizen.getId(),vaccinationTime,VaccinationStatus.OK,"",vaccinationType);
+        }
+
+    public void rejectVaccination(String sscNumber, LocalDateTime vaccinationTime,String note){
+                Citizen citizen = citizensRepository.getCitizenBySscNUmber(sscNumber);
+                vaccinationsRepository.insertRejectedVaccination(citizen.getId(),vaccinationTime,VaccinationStatus.REJECTED,note);
+        }
+
+    public void validateVaccination(String sscNumber) {
+        try {
+            Citizen citizen = citizensRepository.getCitizenBySscNUmber(sscNumber);
+            if(citizen.getNumberOfVaccination() >= 2) {
+                throw new IllegalStateException("Már rendelkezik két oltással.");
+            }
+        }catch (IncorrectResultSizeDataAccessException exception){
+            throw new WrongDataInputException("Nem regisztrált taj: " + sscNumber,exception);
+        }
+    }
+
+    public Citizen getCitizenBySscNumber(String sscNumber){
+        return citizensRepository.getCitizenBySscNUmber(sscNumber);
+    }
+
+    public Vaccination getVaccinationByCitizenId(Long citizenId){
+        return vaccinationsRepository.getVaccinationByCitizenId(citizenId);
     }
 
 }

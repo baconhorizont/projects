@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,5 +74,29 @@ class VaccinationServiceTest {
                 "Helytelen életkor: 2000 Herbie Durnall;2194;2000;hdurnalld@usda.gov;283120121"),
                 Files.readAllLines(Path.of("src/test/resources/citizensDataToCorrect.csv")));
 
+    }
+
+    @Test
+    void testGetCitizensByZipCodeToVaccination(){
+        vaccinationService.insertCitizensFromFile("src/test/resources/citizens.csv");
+
+        vaccinationService.generateFile("2194","dailyVaccination");
+
+    }
+
+    @Test
+    void testVaccination(){
+        vaccinationService.insertCitizensFromFile("src/test/resources/citizens.csv");
+
+        vaccinationService.vaccination("723662833", LocalDateTime.of(2022,3,14,8,0,0),VaccinationType.MODERNA);
+
+    }
+
+    @Test
+    void testRejectVaccination(){
+        vaccinationService.insertCitizensFromFile("src/test/resources/citizens.csv");
+
+        vaccinationService.rejectVaccination("723662833",LocalDateTime.of(2021,5,14,10,0,0),
+                "The patient had a fever.");
     }
 }

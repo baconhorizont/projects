@@ -19,9 +19,19 @@ public class Vaccination {
         this.type = type;
     }
 
-    public Vaccination(Long id, Long citizenId, LocalDateTime vaccinationTime, VaccinationStatus status, String note, VaccinationType type) {
-        this(citizenId, vaccinationTime, status, note, type);
+    public Vaccination(Long citizenId, LocalDateTime vaccinationTime, VaccinationStatus status, VaccinationType type) {
+        this.citizenId = citizenId;
+        this.vaccinationTime = vaccinationTime;
+        this.status = status;
+        this.type = type;
+    }
+
+    public Vaccination(Long id, Long citizenId, LocalDateTime vaccinationTime, VaccinationStatus status, VaccinationType type) {
         this.id = id;
+        this.citizenId = citizenId;
+        this.vaccinationTime = vaccinationTime;
+        this.status = status;
+        this.type = type;
     }
 
     public Long getId() {

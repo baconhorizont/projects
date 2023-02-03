@@ -26,9 +26,18 @@ public class Citizen {
     }
 
 
-    public Citizen(Long id, String name, String zipCode, int age, String email, String socialSecurityNumber) {
+    public Citizen(Long id, String name, String zipCode, int age, String email, String socialSecurityNumber,int numberOfVaccination, LocalDateTime lastVaccination) {
         this(name, zipCode, age, email, socialSecurityNumber);
         this.id = id;
+        this.numberOfVaccination = numberOfVaccination;
+        this.lastVaccination = lastVaccination;
+        this.vaccinations = new ArrayList<>();
+    }
+
+    public Citizen(Long id, String name, String zipCode, int age, String email, String socialSecurityNumber,int numberOfVaccination) {
+        this(name, zipCode, age, email, socialSecurityNumber);
+        this.id = id;
+        this.numberOfVaccination = numberOfVaccination;
         this.vaccinations = new ArrayList<>();
     }
 

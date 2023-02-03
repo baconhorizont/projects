@@ -1,6 +1,8 @@
 package covid;
 
-import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class VaccinationController {
@@ -8,6 +10,8 @@ public class VaccinationController {
     private VaccinationService vaccinationService = new VaccinationService();
     private Scanner scanner = new Scanner(System.in);
     private static final int MENU_EXIT = 7;
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static void main(String[] args) {
         VaccinationController vaccinationMain = new VaccinationController();
@@ -33,13 +37,75 @@ public class VaccinationController {
         switch (menuNumber) {
             case 1 -> scanForRegistration();
             case 2 -> insertCitizensFromFile();
-            case 3 -> System.out.println("Generálás");
-            case 4 -> System.out.println("Oltás");
-            case 5 -> System.out.println("Oltás meghiúsulás");
+            case 3 -> scanForGeneration();
+            case 4 -> vaccination();
+            case 5 -> rejectVaccination();
             case 6 -> System.out.println("Riport");
             case 7 -> System.out.println("Program vége.");
             default -> System.out.println("Nem létező menüpont!");
         }
+    }
+
+    private void rejectVaccination(){
+        try {
+        String sscNumber = scanSscNumber();
+        vaccinationService.validateVaccination(sscNumber);
+        System.out.println("Oltás időpontja: yyyy-MM-dd HH:mm");
+        String time = scanner.nextLine();
+        LocalDateTime vaccinationTime = LocalDateTime.parse(time, FORMATTER);
+        System.out.println("Meghíúsulás oka: ");
+        String cause = scanner.nextLine();
+        vaccinationService.rejectVaccination(sscNumber,vaccinationTime,cause);
+        }catch (WrongDataInputException wdie){
+            System.out.println(wdie.getMessage());
+            System.out.println("Oltás meghíúsulásának mentése megszakadt, kezdje előről.");
+        }
+        System.out.println("Mentés befejezve.");
+    }
+
+    private void vaccination(){
+        try {
+        String sscNumber = scanSscNumber();
+        vaccinationService.validateVaccination(sscNumber);
+        Citizen citizen = vaccinationService.getCitizenBySscNumber(sscNumber);
+        if(citizen.getNumberOfVaccination() == 0){
+        System.out.println("Oltás időpontja: yyyy-MM-dd HH:mm");
+        String time = scanner.nextLine();
+        LocalDateTime vaccinationTime = LocalDateTime.parse(time, FORMATTER);
+        System.out.println("Elérhető oltóanyag típusok: "  + Arrays.toString(VaccinationType.values()));
+        System.out.println("Beadott óltóanyag típusa:");
+        VaccinationType type = VaccinationType.valueOf(scanner.nextLine().toUpperCase());
+        vaccinationService.vaccination(sscNumber,vaccinationTime,type);
+        } else {
+            Vaccination vaccination = vaccinationService.getVaccinationByCitizenId(citizen.getId());
+            System.out.println("Már rendelkezik egy oltással.");
+            System.out.println("Előző oltás időpontja: " + citizen.getLastVaccination());
+            System.out.println("Oltóanyag: " + vaccination.getType());
+            System.out.println("Második oltás időpontja: yyyy-MM-dd HH:mm");
+            String time = scanner.nextLine();
+            LocalDateTime vaccinationTime = LocalDateTime.parse(time, FORMATTER);
+            vaccinationService.vaccination(sscNumber,vaccinationTime,vaccination.getType());
+        }
+        }catch (WrongDataInputException wdie){
+            System.out.println(wdie.getMessage());
+            System.out.println("Oltás megszakadt, kezdje előről.");
+        }
+        System.out.println("Oltás befejezve.");
+    }
+
+
+    private void scanForGeneration(){
+        System.out.println("Generálás");
+        try {
+            String zipCode = scanZipCode();
+            System.out.println("File neve:");
+            String fileName = scanner.nextLine();
+            vaccinationService.generateFile(zipCode,fileName);
+        }catch (WrongDataInputException wdie){
+            System.out.println(wdie.getMessage());
+            System.out.println("Generálás megszakadt, kezdje előről.");
+        }
+        System.out.println("Generálás befejezve.");
     }
 
     private void scanForRegistration() {
