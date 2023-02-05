@@ -13,9 +13,12 @@ public class CitiesRepository {
     }
 
     public City getCityByZipCode(String zipCode){
-        return jdbcTemplate.queryForObject("select * from cities where zip = ?",
-                (rs,rowNum) -> new City(rs.getLong("city_id"), rs.getString("zip")
-                        ,rs.getString("city"), rs.getString("city_part")),zipCode);
+        String sqlQuery = "select * from cities where zip = ?";
+        return jdbcTemplate.queryForObject(sqlQuery,(rs,rowNum) -> new City(rs.getLong("city_id"),
+                rs.getString("zip"),
+                rs.getString("city"),
+                rs.getString("city_part")),
+                zipCode);
     }
 
 }

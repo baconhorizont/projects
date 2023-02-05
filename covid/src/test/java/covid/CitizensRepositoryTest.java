@@ -7,6 +7,7 @@ import org.mariadb.jdbc.MariaDbDataSource;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,6 +76,20 @@ class CitizensRepositoryTest {
 
         citizensRepository.updateCitizenVaccinationById(2L, LocalDateTime.now());
 
+        assertEquals(1,citizensRepository.getCitizenBySscNUmber("613315412").getNumberOfVaccination());
+    }
+
+    @Test
+    void testGetNumberOfVaccinationsByZip(){
+        citizensRepository.insertCitizen("Kata","7030",25,"kata@gmail.com","873668046");
+        citizensRepository.insertCitizen("Bence","7030",84,"kata@gmail.com","873668046");
+        citizensRepository.insertCitizen("Áron","7030",32,"kata@gmail.com","873668046");
+        citizensRepository.insertCitizen("Kata","2222",25,"kata@gmail.com","873668046");
+        citizensRepository.insertCitizen("Kata","1111",25,"kata@gmail.com","873668046");
+
+       List<Integer> result = citizensRepository.getNumberOfVaccinationsByZip("7030");
+
+        assertEquals(List.of(0,0,0),result);
     }
 
 

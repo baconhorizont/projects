@@ -40,7 +40,7 @@ class CitiesRepositoryTest {
 
         City city = citiesRepository.getCityByZipCode("2073");
         assertEquals("Tök",city.getCityName());
-        assertEquals(null,city.getCityPartName());
+        assertNull(city.getCityPartName());
 
         City cityWithPartName = citiesRepository.getCityByZipCode("2484");
         assertEquals("Agárd",cityWithPartName.getCityPartName());

@@ -19,9 +19,10 @@ public class VaccinationsRepository {
     }
 
     public Long insertVaccination(Long citizenId, LocalDateTime vaccinationTime, VaccinationStatus status, String note, VaccinationType type){
+        String sqlQuery = "insert into vaccinations (citizen_id, vaccination_date, `status`, note, vaccination_type) values(?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
-                    PreparedStatement ps = con.prepareStatement("insert into vaccinations (citizen_id, vaccination_date, `status`, note, vaccination_type) values(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement ps = con.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
                     ps.setLong(1,citizenId);
                     ps.setTimestamp(2, Timestamp.valueOf(vaccinationTime));
                     ps.setString(3,status.toString());
@@ -34,11 +35,11 @@ public class VaccinationsRepository {
         return keyHolder.getKey().longValue();
     }
 
-
     public Long insertRejectedVaccination(Long citizenId, LocalDateTime vaccinationTime, VaccinationStatus status, String note){
+        String sqlQuery = "insert into vaccinations (citizen_id, vaccination_date, `status`, note) values(?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
-                    PreparedStatement ps = con.prepareStatement("insert into vaccinations (citizen_id, vaccination_date, `status`, note) values(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement ps = con.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
                     ps.setLong(1,citizenId);
                     ps.setTimestamp(2, Timestamp.valueOf(vaccinationTime));
                     ps.setString(3,status.toString());
